@@ -13,3 +13,40 @@
 /x64/Debug
 /Parallel-Computing-GANs/GAN.vcxproj
 /Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+
+# User-specific files
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pdb
+*.cache
+*.ilk
+*.ilk
+*.tlog/
+*.tmp/
+*.temp/
