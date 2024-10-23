@@ -6,3 +6,10 @@
 /Parallel-Computing-GANs.sln
 /Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj
 /Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj.user
+/.vs
+/Dependencies/NVIDIA
+/Parallel-Computing-GANs/.vs
+/Parallel-Computing-GANs/x64/Debug
+/x64/Debug
+/Parallel-Computing-GANs/GAN.vcxproj
+/Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj
