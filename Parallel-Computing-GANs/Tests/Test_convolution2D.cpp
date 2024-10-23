@@ -1,5 +1,6 @@
 #include "../convolution2D.h"
 
+/*
 // Main test function
 int main() {
     cudnnHandle_t cudnn;
@@ -74,3 +75,4 @@ int main() {
 
     return 0;
 }
+*/

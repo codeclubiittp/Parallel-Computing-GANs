@@ -1,6 +1,8 @@
 ﻿
-#include "Generator.h"
-#include "Discriminator.h"
+#include "generator.h"
+#include "discriminator.h"
+
+/*
 
 int main(int argc, char* argv[]) {
 
@@ -26,9 +28,4 @@ int main(int argc, char* argv[]) {
 	CUDNN_CHECK(cudnnDestroy(libcuDNNHandle));
 	return 0;
 }
-
-
-
-
-
-
+*/
