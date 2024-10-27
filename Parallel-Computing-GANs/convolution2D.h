@@ -1,5 +1,5 @@
 
-#include "Utils.h"
+#include "utils.h"
 
 namespace fox {
 
@@ -58,8 +58,8 @@ namespace fox {
     }
 
     /*
-    * ** Error in this
-    * ** Doesn't compile
+    * Basically there's no Reference for this
+    * 
     */
     void convolution2DGraphFE(cudnnHandle_t& handle, std::vector<double>& image, std::vector<double>& filters,
         std::vector<double>& output, imageInfo2D& imageInfo, filtersInfo2D& filtersInfo) {
@@ -159,6 +159,7 @@ namespace fox {
         cudnnDataType_t xDataType = CUDNN_DATA_DOUBLE;
         CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_DATA_TYPE, CUDNN_TYPE_DATA_TYPE, 1, &xDataType));
 
+        /*
         int64_t xDimensions[] = { 1, 1, imageInfo.channels, 1, imageInfo.height, imageInfo.width };
         int64_t xStrides[] = { 
             1 * imageInfo.channels * 1 * imageInfo.height * imageInfo.width,
@@ -167,11 +168,20 @@ namespace fox {
             imageInfo.height * imageInfo.width, 
             imageInfo.width, 
             1 };
-        int64_t xUniqueId = 'x';
-        int64_t xAlignment = 4;
+        */
 
-        CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_DIMENSIONS, CUDNN_TYPE_INT64, 6, xDimensions));
-        CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_STRIDES, CUDNN_TYPE_INT64, 6, xStrides));
+        int64_t xDimensions[] = { 1, imageInfo.channels, imageInfo.height, imageInfo.width };
+        int64_t xStrides[] = {
+            imageInfo.channels * imageInfo.height * imageInfo.width,  
+            imageInfo.height * imageInfo.width,                      
+            imageInfo.width,                                         
+            1                                                        
+        };
+        int64_t xUniqueId = 'x';
+        int64_t xAlignment = sizeof(double);
+
+        CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_DIMENSIONS, CUDNN_TYPE_INT64, 4, xDimensions));
+        CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_STRIDES, CUDNN_TYPE_INT64, 4, xStrides));
         CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_UNIQUE_ID, CUDNN_TYPE_INT64, 1, &xUniqueId));
         CUDNN_CHECK(cudnnBackendSetAttribute(xDescriptor, CUDNN_ATTR_TENSOR_BYTE_ALIGNMENT, CUDNN_TYPE_INT64,  1, &xAlignment));
         CUDNN_CHECK(cudnnBackendFinalize(xDescriptor));
@@ -183,6 +193,7 @@ namespace fox {
         CUDNN_CHECK(cudnnBackendSetAttribute(filterDescriptor, CUDNN_ATTR_TENSOR_DATA_TYPE, 
             CUDNN_TYPE_DATA_TYPE, 1, &filterDataType));
 
+        /*
         int64_t filterDimensions[] = {
             1,                              
             filtersInfo.n,                  
@@ -200,14 +211,24 @@ namespace fox {
             filtersInfo.width,                                                               
             1                                                                              
         };
+        */
+
+        int64_t filterDimensions[] = {filtersInfo.n, imageInfo.channels, filtersInfo.height, filtersInfo.width };
+
+        int64_t filterStrides[] = {
+            imageInfo.channels * filtersInfo.height * filtersInfo.width,  
+            filtersInfo.height * filtersInfo.width,                       
+            filtersInfo.width,                                            
+            1                                                             
+        };
 
         int64_t filterUniqueId = 'f';
-        int64_t filterAlignment = 4;
+        int64_t filterAlignment = sizeof(double);
 
         CUDNN_CHECK(cudnnBackendSetAttribute(filterDescriptor, CUDNN_ATTR_TENSOR_DIMENSIONS,
-            CUDNN_TYPE_INT64, 6, filterDimensions));
+            CUDNN_TYPE_INT64, 4, filterDimensions));
         CUDNN_CHECK(cudnnBackendSetAttribute(filterDescriptor, CUDNN_ATTR_TENSOR_STRIDES,
-            CUDNN_TYPE_INT64, 6, filterStrides));
+            CUDNN_TYPE_INT64, 4, filterStrides));
         CUDNN_CHECK(cudnnBackendSetAttribute(filterDescriptor, CUDNN_ATTR_TENSOR_UNIQUE_ID,
             CUDNN_TYPE_INT64, 1, &filterUniqueId));
         CUDNN_CHECK(cudnnBackendSetAttribute(filterDescriptor, CUDNN_ATTR_TENSOR_BYTE_ALIGNMENT,
@@ -224,6 +245,7 @@ namespace fox {
         int64_t outputHeight = imageInfo.height - filtersInfo.height + 1;  
         int64_t outputWidth = imageInfo.width - filtersInfo.width + 1; 
 
+        /*
         output = std::vector<double>(outputWidth * outputHeight);
 
         int64_t outputDimensions[] = {
@@ -242,14 +264,26 @@ namespace fox {
             outputWidth * 1,                                  
             1                                               
         };
+        */
 
+        int64_t outputDimensions[] = {1, filtersInfo.n, outputHeight, outputWidth};
+
+        int64_t outputStrides[] = {
+            filtersInfo.n * outputHeight * outputWidth,  
+            outputHeight * outputWidth,                  
+            outputWidth,                                 
+            1                                            
+        };
+        
+        output = std::vector<double>(1 * filtersInfo.n * outputHeight * outputWidth);
+        
         int64_t outputUniqueId = 'o';
-        int64_t outputAlignment = 4;
+        int64_t outputAlignment = sizeof(double);
 
         CUDNN_CHECK(cudnnBackendSetAttribute(outputDescriptor, CUDNN_ATTR_TENSOR_DIMENSIONS,
-            CUDNN_TYPE_INT64, 6, outputDimensions));
+            CUDNN_TYPE_INT64, 4, outputDimensions));
         CUDNN_CHECK(cudnnBackendSetAttribute(outputDescriptor,CUDNN_ATTR_TENSOR_STRIDES,
-            CUDNN_TYPE_INT64, 6, outputStrides));
+            CUDNN_TYPE_INT64, 4, outputStrides));
         CUDNN_CHECK(cudnnBackendSetAttribute(outputDescriptor, CUDNN_ATTR_TENSOR_UNIQUE_ID,
             CUDNN_TYPE_INT64, 1, &outputUniqueId));
         CUDNN_CHECK(cudnnBackendSetAttribute(outputDescriptor, CUDNN_ATTR_TENSOR_BYTE_ALIGNMENT,
@@ -263,9 +297,9 @@ namespace fox {
         cudnnConvolutionMode_t convMode = CUDNN_CONVOLUTION;
 
         int64_t convDimensions = 2;
-        int64_t convPadding[] = { 0, 0, 0 };
-        int64_t convStride[] = { 1, 1 ,1 };
-        int64_t convDilation[] = { 1, 1, 1 };
+        int64_t convPadding[] = { 0, 0};
+        int64_t convStride[] = { 1, 1};
+        int64_t convDilation[] = { 1, 1};
 
         CUDNN_CHECK(cudnnBackendSetAttribute(convOpDescriptor, CUDNN_ATTR_CONVOLUTION_COMP_TYPE,
             CUDNN_TYPE_DATA_TYPE, 1, &convDatatype));
@@ -274,13 +308,13 @@ namespace fox {
         CUDNN_CHECK(cudnnBackendSetAttribute(convOpDescriptor, CUDNN_ATTR_CONVOLUTION_SPATIAL_DIMS,
             CUDNN_TYPE_INT64, 1, &convDimensions));
         CUDNN_CHECK(cudnnBackendSetAttribute(convOpDescriptor, CUDNN_ATTR_CONVOLUTION_PRE_PADDINGS,
-            CUDNN_TYPE_INT64, 3, &convPadding));
+            CUDNN_TYPE_INT64, 2, &convPadding));
         CUDNN_CHECK(cudnnBackendSetAttribute(convOpDescriptor, CUDNN_ATTR_CONVOLUTION_POST_PADDINGS,
-            CUDNN_TYPE_INT64, 3, &convPadding));
+            CUDNN_TYPE_INT64, 2, &convPadding));
         CUDNN_CHECK(cudnnBackendSetAttribute(convOpDescriptor, CUDNN_ATTR_CONVOLUTION_FILTER_STRIDES,
-            CUDNN_TYPE_INT64, 3, &convStride));
+            CUDNN_TYPE_INT64, 2, &convStride));
         CUDNN_CHECK(cudnnBackendSetAttribute(convOpDescriptor, CUDNN_ATTR_CONVOLUTION_DILATIONS,
-            CUDNN_TYPE_INT64, 3, &convDilation));
+            CUDNN_TYPE_INT64, 2, &convDilation));
         CUDNN_CHECK(cudnnBackendFinalize(convOpDescriptor));
 
         cudnnBackendDescriptor_t convForwardDescriptor;
@@ -301,8 +335,7 @@ namespace fox {
         CUDNN_CHECK(cudnnBackendSetAttribute(convForwardDescriptor, CUDNN_ATTR_OPERATION_CONVOLUTION_FORWARD_ALPHA,
             CUDNN_TYPE_DOUBLE, 1, &alpha));
         CUDNN_CHECK(cudnnBackendSetAttribute(convForwardDescriptor,
-            CUDNN_ATTR_OPERATION_CONVOLUTION_FORWARD_BETA,
-            CUDNN_TYPE_DOUBLE, 1, &beta));
+            CUDNN_ATTR_OPERATION_CONVOLUTION_FORWARD_BETA, CUDNN_TYPE_DOUBLE, 1, &beta));
         CUDNN_CHECK(cudnnBackendFinalize(convForwardDescriptor));
 
         cudnnBackendDescriptor_t opGraph;
@@ -353,6 +386,8 @@ namespace fox {
         int64_t uids[3] = { 'x', 'f', 'o' };
 
         void* workspace;
+
+        CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&workspace), planWorkspaceSize));
 
         cudnnBackendDescriptor_t varpackDescriptor;
         CUDNN_CHECK(cudnnBackendCreateDescriptor(CUDNN_BACKEND_VARIANT_PACK_DESCRIPTOR, &varpackDescriptor));

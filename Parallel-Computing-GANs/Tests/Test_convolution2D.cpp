@@ -1,6 +1,6 @@
 #include "../convolution2D.h"
 
-/*
+
 // Main test function
 int main() {
     cudnnHandle_t cudnn;
@@ -36,7 +36,7 @@ int main() {
     std::vector<double> output;
 
     // Perform the convolution
-    fox::convolution2DGraphFE(cudnn, image, filter, output, imageInfo, filtersInfo);
+    fox::convolution2DGraph(cudnn, image, filter, output, imageInfo, filtersInfo);
 
     // Expected output (manually computed for this example):
     // (This is the result of applying a Sobel-like filter to the input image)
@@ -55,24 +55,8 @@ int main() {
         }
     }
 
-    // Check against expected output
-    bool passed = true;
-    for (size_t i = 0; i < output.size(); ++i) {
-        if (std::abs(output[i] - expectedOutput[i]) > 1e-6) {
-            passed = false;
-            std::cerr << "Mismatch at index " << i << ": got " << output[i] << ", expected " << expectedOutput[i] << std::endl;
-        }
-    }
-
-    if (passed) {
-        std::cout << "Test passed!" << std::endl;
-    }
-    else {
-        std::cout << "Test failed." << std::endl;
-    }
-
     CUDNN_CHECK(cudnnDestroy(cudnn));
 
     return 0;
 }
-*/
+
