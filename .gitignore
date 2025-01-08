@@ -1,52 +1,94 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs/Parallel-Computing-GANs
-/Parallel-Computing-GANs.sln
-/Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj
-/Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj.user
-/.vs
-/Dependencies/NVIDIA
-/Parallel-Computing-GANs/.vs
-/Parallel-Computing-GANs/x64/Debug
-/x64/Debug
-/Parallel-Computing-GANs/GAN.vcxproj
-/Parallel-Computing-GANs/Parallel-Computing-GANs.vcxproj
-
-# Visual Studio
+﻿# Visual Studio
 .vs/
+*.[Cc]ache
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+*.sln
+*.vcxproj
+*.vcxproj.*
+*.pdb
+*.ilk
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+ipch/
 
 # Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+[Bb]uild/
+Tests/[Bb]uild/
+**/[Bb]uild/
 
 # Visual Studio Code
 .vscode/
+*.code-workspace
 
-# Rider
+# JetBrains Rider
 .idea/
 *.sln.iml
 
-# NuGet Packages
-*.nupkg
-*.snupkg
-*.nuspec
-packages/
-
 # User-specific files
+*.rsuser
 *.dbmdl
 *.dbproj.schemaview
 *.jfm
-*.pdb
+*.pfx
+*.publishsettings
+
+# Build results and intermediates
+*.tlog/
+*.lastbuildstate
+*.obj
+*.iobj
+*.pch
+*.ipch
+*.exp
+*.lib
+*.sbr
+*.tlb
+*.tlh
+*.bak
 *.cache
 *.ilk
-*.ilk
-*.tlog/
-*.tmp/
-*.temp/
+*.log
+*.tmp
+*.temp
+[Tt]emp/
+*.vspscc
+*.vssscc
+.builds
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Dependencies (adjust paths as needed)
+Dependencies/NVIDIA/
+**/Dependencies/NVIDIA/
+
+# IDE settings and local configs
+*.swp
+*~
+*.DS_Store
+Thumbs.db
+
+# Custom build directories
+[Tt]ests/[Bb]uild/
+**/[Tt]ests/[Bb]uild/

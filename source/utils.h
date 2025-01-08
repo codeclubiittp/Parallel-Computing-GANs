@@ -10,7 +10,7 @@
 #include <cudnn_ops.h>
 #include <cudnn_graph.h>
 
-#include <cudnn_frontend.h>
+#include "../dependencies/cudnn_frontend/include/cudnn_frontend.h"
 
 #include <cublas_v2.h>
 #include <cuda.h>

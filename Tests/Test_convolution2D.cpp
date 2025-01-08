@@ -1,4 +1,4 @@
-#include "../convolution2D.h"
+#include "../source/convolution2D.h"
 
 
 // Main test function
