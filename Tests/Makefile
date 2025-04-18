@@ -21,7 +21,6 @@ LDFLAGS := $(CUDA_LIBS)
 
 # Test source files
 TESTS := Test_convolution2D.cpp \
-		Test_affineTransform.cpp
 
 # Create a list of binary output files
 TEST_BINARIES := $(patsubst %.cpp,$(BUILDDIR)/%,$(TESTS))

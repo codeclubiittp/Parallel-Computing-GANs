@@ -1,7 +1,4 @@
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <stdio.h>
-#include <math.h>
+#include "utils.h"
 
 // Constants to prevent numerical instability
 #define EPSILON 1e-7f
@@ -9,12 +6,12 @@
 #define CLIP_MAX 1.0f - EPSILON
 
 // CUDA kernel for computing binary cross entropy element-wise
-__global__ void binaryCrossEntropyKernel(const float* predictions, const float* targets,
-    float* losses, int size) {
+__global__ void
+binaryCrossEntropyKernel(const float* predictions, const float* targets, float* losses, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size) {
         // Clip predictions to avoid log(0) or log(1)
-        float pred = fmaxf(fminf(predictions[idx], CLIP_MAX), CLIP_MIN);
+        float pred   = fmaxf(fminf(predictions[idx], CLIP_MAX), CLIP_MIN);
         float target = targets[idx];
 
         // Binary cross entropy formula: -[target * log(pred) + (1 - target) * log(1 - pred)]
@@ -23,7 +20,8 @@ __global__ void binaryCrossEntropyKernel(const float* predictions, const float* 
 }
 
 // CUDA kernel for computing the sum (reduction)
-__global__ void sumReductionKernel(float* input, float* output, int size) {
+__global__ void
+sumReductionKernel(float* input, float* output, int size) {
     extern __shared__ float sharedData[];
 
     int tid = threadIdx.x;
@@ -32,8 +30,7 @@ __global__ void sumReductionKernel(float* input, float* output, int size) {
     // Load data to shared memory
     if (idx < size) {
         sharedData[tid] = input[idx];
-    }
-    else {
+    } else {
         sharedData[tid] = 0.0f;
     }
     __syncthreads();
@@ -53,12 +50,12 @@ __global__ void sumReductionKernel(float* input, float* output, int size) {
 }
 
 // CUDA kernel for computing gradients w.r.t. predictions for backpropagation
-__global__ void binaryCrossEntropyGradKernel(const float* predictions, const float* targets,
-    float* gradients, int size) {
+__global__ void
+binaryCrossEntropyGradKernel(const float* predictions, const float* targets, float* gradients, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size) {
         // Clip predictions to avoid division by zero
-        float pred = fmaxf(fminf(predictions[idx], CLIP_MAX), CLIP_MIN);
+        float pred   = fmaxf(fminf(predictions[idx], CLIP_MAX), CLIP_MIN);
         float target = targets[idx];
 
         // Gradient: -target/pred + (1-target)/(1-pred)
@@ -67,10 +64,14 @@ __global__ void binaryCrossEntropyGradKernel(const float* predictions, const flo
 }
 
 // Host function to compute BCE loss
-float computeBCELoss(const float* h_predictions, const float* h_targets, int size,
-    float* h_gradients = nullptr, bool compute_gradients = false) {
+float
+computeBCELoss(const float* h_predictions,
+               const float* h_targets,
+               int size,
+               float* h_gradients     = nullptr,
+               bool compute_gradients = false) {
     // Device memory pointers
-    float* d_predictions, * d_targets, * d_losses, * d_blockSums, * d_totalSum;
+    float *d_predictions, *d_targets, *d_losses, *d_blockSums, *d_totalSum;
     float* d_gradients = nullptr;
 
     // Allocate device memory
@@ -88,16 +89,14 @@ float computeBCELoss(const float* h_predictions, const float* h_targets, int siz
 
     // Set up the grid and block dimensions
     int threadsPerBlock = 256;
-    int blocksPerGrid = (size + threadsPerBlock - 1) / threadsPerBlock;
+    int blocksPerGrid   = (size + threadsPerBlock - 1) / threadsPerBlock;
 
     // Launch kernel to compute BCE loss element-wise
-    binaryCrossEntropyKernel << <blocksPerGrid, threadsPerBlock >> > (
-        d_predictions, d_targets, d_losses, size);
+    binaryCrossEntropyKernel<<<blocksPerGrid, threadsPerBlock>>>(d_predictions, d_targets, d_losses, size);
 
     // Compute gradients if requested
     if (compute_gradients) {
-        binaryCrossEntropyGradKernel << <blocksPerGrid, threadsPerBlock >> > (
-            d_predictions, d_targets, d_gradients, size);
+        binaryCrossEntropyGradKernel<<<blocksPerGrid, threadsPerBlock>>>(d_predictions, d_targets, d_gradients, size);
 
         // Copy gradients back to host
         cudaMemcpy(h_gradients, d_gradients, size * sizeof(float), cudaMemcpyDeviceToHost);
@@ -107,20 +106,19 @@ float computeBCELoss(const float* h_predictions, const float* h_targets, int siz
     cudaMalloc((void**)&d_blockSums, blocksPerGrid * sizeof(float));
 
     // Launch reduction kernel
-    sumReductionKernel << <blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(float) >> > (
+    sumReductionKernel<<<blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(float)>>>(
         d_losses, d_blockSums, size);
 
     // Final reduction to get total sum
     float totalLoss;
     if (blocksPerGrid <= threadsPerBlock) {
         cudaMalloc((void**)&d_totalSum, sizeof(float));
-        sumReductionKernel << <1, threadsPerBlock, threadsPerBlock * sizeof(float) >> > (
+        sumReductionKernel<<<1, threadsPerBlock, threadsPerBlock * sizeof(float)>>>(
             d_blockSums, d_totalSum, blocksPerGrid);
 
         cudaMemcpy(&totalLoss, d_totalSum, sizeof(float), cudaMemcpyDeviceToHost);
         cudaFree(d_totalSum);
-    }
-    else {
+    } else {
         // For very large arrays, multi-stage reduction
         float* h_blockSums = new float[blocksPerGrid];
         cudaMemcpy(h_blockSums, d_blockSums, blocksPerGrid * sizeof(float), cudaMemcpyDeviceToHost);
@@ -146,34 +144,4 @@ float computeBCELoss(const float* h_predictions, const float* h_targets, int siz
     }
 
     return meanLoss;
-}
-
-// Example usage
-int main() {
-    const int size = 1024;
-    float* h_predictions = new float[size];
-    float* h_targets = new float[size];
-    float* h_gradients = new float[size];
-
-    // Initialize with some binary classification data
-    for (int i = 0; i < size; i++) {
-        // Simulated probabilities (would come from sigmoid in real applications)
-        h_predictions[i] = 0.5f + 0.4f * sinf(static_cast<float>(i) * 0.1f);
-        // Binary targets (0 or 1)
-        h_targets[i] = (i % 2 == 0) ? 1.0f : 0.0f;
-    }
-
-    // Compute BCE loss and gradients
-    float bce = computeBCELoss(h_predictions, h_targets, size, h_gradients, true);
-
-    printf("Binary Cross Entropy Loss: %f\n", bce);
-    printf("First few gradients: %f, %f, %f, %f\n",
-        h_gradients[0], h_gradients[1], h_gradients[2], h_gradients[3]);
-
-    // Clean up
-    delete[] h_predictions;
-    delete[] h_targets;
-    delete[] h_gradients;
-
-    return 0;
 }

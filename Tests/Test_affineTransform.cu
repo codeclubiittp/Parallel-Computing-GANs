@@ -1,29 +1,30 @@
-#include "../source/affineTransform.h"
-#include <cassert>
+#include "../source/affineTransform.cuh"
 
-/*
 // Helper function to check results
 template <typename T>
-void checkResults(T* computed, T* expected, size_t size) {
+void
+checkResults(T* computed, T* expected, size_t size) {
     for (size_t i = 0; i < size; ++i) {
         assert(computed[i] == expected[i]);  // Use assert for simplicity; consider logging for more complex scenarios
     }
 }
 
-int main() {
+int
+main() {
     size_t batchSize = 2;
-    size_t inputDim = 3;
+    size_t inputDim  = 3;
     size_t outputDim = 2;
 
     // Allocate and initialize host data
-    std::vector<double> hx(batchSize * inputDim), hW(inputDim * outputDim), hB(outputDim), hy(batchSize * outputDim, 0.0);
+    std::vector<double> hx(batchSize * inputDim), hW(inputDim * outputDim), hB(outputDim),
+        hy(batchSize * outputDim, 0.0);
 
-    hx = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
-    hW = { 0.5, 1.0, 0.5, 1.0, 0.5, 1.0 };
-    hB = { 1.0, 1.0 };
+    hx = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+    hW = {0.5, 1.0, 0.5, 1.0, 0.5, 1.0};
+    hB = {1.0, 1.0};
 
     // Allocate device memory
-    double* d_x, * d_W;
+    double *d_x, *d_W;
     CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&d_x), batchSize * inputDim * sizeof(double)));
     CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&d_W), inputDim * outputDim * sizeof(double)));
 
@@ -45,4 +46,3 @@ int main() {
 
     return 0;
 }
-*/
