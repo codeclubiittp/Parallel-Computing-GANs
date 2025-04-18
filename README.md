@@ -4,7 +4,7 @@ A CUDA-accelerated project implementing core components of Generative Adversaria
 
 ---
 
-## 🔧 Features
+## Features
 
 - Custom CUDA/C++ implementations of neural network layers
 - Efficient memory management and GPU acceleration using CUDA
@@ -12,7 +12,7 @@ A CUDA-accelerated project implementing core components of Generative Adversaria
 - Modular structure for experimentation and educational use
 
 ---
-## 📁 Directory Structure
+## Directory Structure
 ```
 Parallel-Computing-GANs/
 ├── include/
@@ -36,7 +36,7 @@ Parallel-Computing-GANs/
 ```
 ---
 
-## 🧠 Implemented Modules
+## Implemented Modules
 
 | Module                  | Description |
 |--------------------------|-------------|
@@ -50,9 +50,9 @@ Parallel-Computing-GANs/
 
 ---
 
-## ⚙️ Environment Setup
+## Environment Setup
 
-### ✅ Dependencies
+### Dependencies
 
 Ensure the following are installed:
 
@@ -66,7 +66,7 @@ Ensure the following are installed:
 
 ---
 
-### 🐧 Linux / WSL Setup
+### Linux / WSL Setup
 
 1. **Export paths for CUDA and cuDNN**:
    ```bash
